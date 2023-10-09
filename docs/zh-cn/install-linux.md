@@ -1,4 +1,4 @@
-# centos下安装
+## centos下安装
 ```shell script
 # 1.centos7以上
 cat /etc/redhat-release
