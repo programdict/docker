@@ -102,13 +102,33 @@ redis-cli --cluster create 49.4.5.89:6381 49.4.5.89:6382 117.78.46.209:6381 117.
 检查集群 redis命令行  cluster info，cluster nodes
 4.配置文件放开requirepass、masterauth注释，重启docker实例
 
-# nginx
+## nginx
 https://blog.csdn.net/BThinker/article/details/123507820  
+安装命令
 ```shell script
+# 示例
 docker run --name nginx --net=host --privileged=true -v /home/nginx/conf/nginx.conf:/etc/nginx/nginx.conf -v /home/nginx/conf/conf.d:/etc/nginx/conf.d -v /home/nginx/log:/var/log/nginx -d nginx  
 docker run --name nginx --net=host --privileged=true -v /server/nginx/conf/nginx.conf:/etc/nginx/nginx.conf -v /server/nginx/conf/conf.d:/etc/nginx/conf.d -v /server/nginx/log:/var/log/nginx -d nginx  
-
-docker run --name nginx --net=host  --privileged=true -v /root/nginx/conf.d:/etc/nginx/conf.d  -d nginx  
+# 制定端口映射
+docker run --name nginx -p 80:80 -p 443:443  --privileged=true -v /root/nginx/conf.d:/etc/nginx/conf.d  -d nginx  
+```
+配置日志切割  
+创建nginx文件，放到/etc/logrotate.d目录下
+```shell script
+/server/nginx/log/*.log {
+        daily
+        missingok
+        rotate 7
+        size 1G
+        compress
+        delaycompress
+        notifempty
+        create 640 root root
+        sharedscripts
+        postrotate
+          docker exec nginx bash -c "if   [ -f /var/run/nginx.pid ] ; then  kill -USR1 `docker exec nginx cat /var/run/nginx.pid`; echo 'over'; fi"
+        endscript
+}
 
 ```
 
